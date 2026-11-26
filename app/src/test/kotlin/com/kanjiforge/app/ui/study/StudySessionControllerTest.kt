@@ -216,4 +216,109 @@ class StudySessionControllerTest {
         assertEquals(1, store._sessions.value.first().total)
         assertEquals(1, store._sessions.value.first().correct)
     }
+
+    @Test
+    fun explicitQuizFocusOverridesPreferencesAcrossAllQuestions() = runTest {
+        val clock = MutableClock(1_700_000_000_000L)
+        val catalog = FakeReferenceCatalog()
+        val store = FakeStudyStore(clock)
+
+        val d1 = makeDetail(1, "一", "one", "いち")
+        val d2 = makeDetail(2, "二", "two", "に")
+        val d3 = makeDetail(3, "三", "three", "さん")
+        val d4 = makeDetail(4, "四", "four", "よん")
+        listOf(d1, d2, d3, d4).forEach(catalog::addKanji)
+        catalog.sequenceDecks[StudySequenceFamily.JLPT to 5] = listOf(d1.summary, d2.summary)
+
+        store._preferences.value = StudyPreferences(quizPrompt = QuizPrompt.MIXED)
+
+        val controller = StudySessionController(
+            mode = SessionMode.QUIZ,
+            spec = SessionSpec.SequenceSet(StudySequenceFamily.JLPT, 5, offset = 0, batchSize = 10),
+            catalog = catalog,
+            store = store,
+            clock = clock,
+            randomSeed = 7L,
+            scope = this,
+            quizFocus = QuizPrompt.READING,
+        )
+        advanceUntilIdle()
+
+        val q1 = controller.state.value as StudySessionUiState.Active
+        assertEquals(QuizPrompt.READING, q1.quizFocus)
+        assertEquals(QuizPrompt.READING, q1.card.quiz?.prompt)
+        assertEquals("いち", q1.card.quiz?.correctAnswer)
+
+        controller.selectQuizOption(q1.card.quiz!!.correctAnswer)
+        advanceUntilIdle()
+        controller.advanceAfterQuiz()
+        advanceUntilIdle()
+
+        val q2 = controller.state.value as StudySessionUiState.Active
+        assertEquals(QuizPrompt.READING, q2.quizFocus)
+        assertEquals(QuizPrompt.READING, q2.card.quiz?.prompt)
+        assertEquals("に", q2.card.quiz?.correctAnswer)
+    }
+
+    @Test
+    fun missingReadingOrWordFallsBackToMeaningAndMatchesPrompt() = runTest {
+        val clock = MutableClock(1_700_000_000_000L)
+        val catalog = FakeReferenceCatalog()
+        val store = FakeStudyStore(clock)
+
+        val noReadingSummary = KanjiSummary(1, "々", "repetition", strokeCount = 3, jlpt = null, grade = null, sequence = 1)
+        val noReadingDetail = KanjiDetail(
+            summary = noReadingSummary,
+            translation = "repetition",
+            on = emptyList(),
+            kun = emptyList(),
+            nanori = emptyList(),
+            romanizedReading = "",
+            strokePaths = emptyList(),
+            radicals = emptyList(),
+            decomposition = "",
+            classicalRadical = null,
+            notes = "",
+            words = emptyList(),
+            sentences = emptyList(),
+            names = emptyList(),
+        )
+        val d2 = makeDetail(2, "二", "two", "に")
+        val d3 = makeDetail(3, "三", "three", "さん")
+        val d4 = makeDetail(4, "四", "four", "よん")
+        listOf(noReadingDetail, d2, d3, d4).forEach(catalog::addKanji)
+        catalog.sequenceDecks[StudySequenceFamily.JLPT to 5] = listOf(noReadingSummary)
+
+        val readingController = StudySessionController(
+            mode = SessionMode.QUIZ,
+            spec = SessionSpec.SequenceSet(StudySequenceFamily.JLPT, 5, offset = 0, batchSize = 10),
+            catalog = catalog,
+            store = store,
+            clock = clock,
+            randomSeed = 11L,
+            scope = this,
+            quizFocus = QuizPrompt.READING,
+        )
+        advanceUntilIdle()
+
+        val readingActive = readingController.state.value as StudySessionUiState.Active
+        assertEquals(QuizPrompt.MEANING, readingActive.card.quiz?.prompt)
+        assertEquals("repetition", readingActive.card.quiz?.correctAnswer)
+
+        val wordController = StudySessionController(
+            mode = SessionMode.QUIZ,
+            spec = SessionSpec.SequenceSet(StudySequenceFamily.JLPT, 5, offset = 0, batchSize = 10),
+            catalog = catalog,
+            store = store,
+            clock = clock,
+            randomSeed = 11L,
+            scope = this,
+            quizFocus = QuizPrompt.WORD,
+        )
+        advanceUntilIdle()
+
+        val wordActive = wordController.state.value as StudySessionUiState.Active
+        assertEquals(QuizPrompt.MEANING, wordActive.card.quiz?.prompt)
+        assertEquals("repetition", wordActive.card.quiz?.correctAnswer)
+    }
 }

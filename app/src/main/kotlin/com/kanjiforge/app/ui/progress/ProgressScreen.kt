@@ -146,7 +146,7 @@ private fun SessionRow(item: SessionRecord) {
     val colors = KanjiForgeTheme.colors
     val (icon, accent, modeLabel) = when (item.mode) {
         SessionMode.CARDS -> Triple(Icons.Outlined.AutoStories, colors.modeCardsAccent, "Flashcards")
-        SessionMode.QUIZ -> Triple(Icons.Outlined.Quiz, colors.modeQuizAccent, "Quick quiz")
+        SessionMode.QUIZ -> Triple(Icons.Outlined.Quiz, colors.modeQuizAccent, "Multiple choice")
         SessionMode.WRITING -> Triple(Icons.Outlined.Gesture, colors.modeWritingAccent, "Writing practice")
     }
     val accuracy = if (item.total > 0) ((item.correct.toFloat() / item.total) * 100f).roundToInt() else 0

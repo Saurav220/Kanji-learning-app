@@ -1,6 +1,7 @@
 package com.kanjiforge.app.ui.navigation
 
 import com.kanjiforge.app.data.reference.model.StudySequenceFamily
+import com.kanjiforge.app.domain.QuizPrompt
 import com.kanjiforge.app.domain.SessionMode
 import com.kanjiforge.app.domain.SessionSpec
 import org.junit.Assert.assertEquals
@@ -23,6 +24,14 @@ class NavigationChromeTest {
             val route = StudySessionRoute.from(SessionMode.QUIZ, spec)
             assertEquals(SessionMode.QUIZ, route.mode)
             assertEquals(spec, route.toSpec())
+            assertNull(route.quizPrompt)
+
+            val focusedRoute = StudySessionRoute.from(SessionMode.QUIZ, spec, QuizPrompt.READING)
+            assertEquals(QuizPrompt.READING, focusedRoute.quizPrompt)
+            assertEquals(spec, focusedRoute.toSpec())
+
+            val cardRoute = StudySessionRoute.from(SessionMode.CARDS, spec, QuizPrompt.READING)
+            assertNull(cardRoute.quizPrompt)
         }
     }
 

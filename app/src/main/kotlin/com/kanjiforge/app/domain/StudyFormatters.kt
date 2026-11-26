@@ -64,6 +64,14 @@ fun QuizPrompt.displayLabel(): String = when (this) {
     QuizPrompt.MIXED -> "Mixed questions"
 }
 
+fun QuizPrompt.description(): String = when (this) {
+    QuizPrompt.MEANING -> "Pick the English meaning for each kanji"
+    QuizPrompt.READING -> "Pick the correct on or kun reading"
+    QuizPrompt.WORD -> "Pick a vocabulary word using each kanji"
+    QuizPrompt.SENTENCE -> "Pick a sentence using each kanji"
+    QuizPrompt.MIXED -> "Rotate through meanings, readings, words, and sentences"
+}
+
 fun Rating.displayLabel(): String = when (this) {
     Rating.AGAIN -> "Again"
     Rating.HARD -> "Hard"

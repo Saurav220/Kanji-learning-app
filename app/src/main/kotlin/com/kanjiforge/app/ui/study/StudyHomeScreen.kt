@@ -1,5 +1,6 @@
 package com.kanjiforge.app.ui.study
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,7 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.ChevronRight
@@ -28,6 +31,8 @@ import androidx.compose.material.icons.outlined.Quiz
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -52,11 +57,14 @@ import androidx.lifecycle.viewModelScope
 import com.kanjiforge.app.data.reference.model.StudySequenceFamily
 import com.kanjiforge.app.domain.DeckSetSummary
 import com.kanjiforge.app.domain.LevelProgressSummary
+import com.kanjiforge.app.domain.QuizPrompt
 import com.kanjiforge.app.domain.SequenceLevelsState
 import com.kanjiforge.app.domain.SequenceSetsState
 import com.kanjiforge.app.domain.SessionMode
 import com.kanjiforge.app.domain.StudyCatalog
 import com.kanjiforge.app.domain.TodayDashboardState
+import com.kanjiforge.app.domain.description
+import com.kanjiforge.app.domain.displayLabel
 import com.kanjiforge.app.ui.components.EmptyMessage
 import com.kanjiforge.app.ui.components.ForgeCard
 import com.kanjiforge.app.ui.components.ForgeProgressBar
@@ -279,11 +287,13 @@ fun StudyLevelsScreen(
 @Composable
 fun StudySetsScreen(
     viewModel: StudySetsViewModel,
-    onStartSet: (SessionMode, offset: Int, batchSize: Int) -> Unit,
+    defaultQuizFocus: QuizPrompt,
+    onStartSet: (SessionMode, QuizPrompt?, offset: Int, batchSize: Int) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showModePicker by remember { mutableStateOf(false) }
     var selectedMode by remember { mutableStateOf(SessionMode.CARDS) }
+    var selectedQuizFocus by remember { mutableStateOf(defaultQuizFocus) }
     var pendingOffset by remember { mutableIntStateOf(0) }
     var pendingSize by remember { mutableIntStateOf(10) }
 
@@ -334,6 +344,7 @@ fun StudySetsScreen(
                                         pendingOffset = setSummary.offset
                                         pendingSize = setSummary.batchSize
                                         selectedMode = SessionMode.CARDS
+                                        selectedQuizFocus = defaultQuizFocus
                                         showModePicker = true
                                     }
                                 }
@@ -353,9 +364,12 @@ fun StudySetsScreen(
         StudyModePickerDialog(
             selectedMode = selectedMode,
             onSelectMode = { selectedMode = it },
+            selectedQuizFocus = selectedQuizFocus,
+            onSelectQuizFocus = { selectedQuizFocus = it },
             onStart = {
                 showModePicker = false
-                onStartSet(selectedMode, pendingOffset, pendingSize)
+                val focus = if (selectedMode == SessionMode.QUIZ) selectedQuizFocus else null
+                onStartSet(selectedMode, focus, pendingOffset, pendingSize)
             },
             onDismiss = { showModePicker = false },
         )
@@ -363,19 +377,115 @@ fun StudySetsScreen(
 }
 
 @Composable
+fun QuizFocusPickerDialog(
+    currentFocus: QuizPrompt,
+    onSelectFocus: (QuizPrompt) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = KanjiForgeTheme.colors
+    val haptics = rememberKanjiHaptics()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                "Choose quiz focus",
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold,
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    "Pick what you want to be tested on in this session.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                QuizPrompt.entries.forEach { prompt ->
+                    val isCurrent = prompt == currentFocus
+                    ForgeCard(
+                        onClick = {
+                            haptics(KanjiHaptic.TAP)
+                            onSelectFocus(prompt)
+                        },
+                        containerColor = if (isCurrent) {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerLow
+                        },
+                        borderColor = if (isCurrent) MaterialTheme.colorScheme.primary else colors.cardBorder,
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Column(
+                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(
+                                    prompt.displayLabel(),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
+                                if (isCurrent) {
+                                    MetaPill(
+                                        text = "Last used",
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    )
+                                }
+                            }
+                            Text(
+                                prompt.description(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text("Cancel")
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 fun StudyModePickerDialog(
     selectedMode: SessionMode,
     onSelectMode: (SessionMode) -> Unit,
+    selectedQuizFocus: QuizPrompt,
+    onSelectQuizFocus: (QuizPrompt) -> Unit,
     onStart: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = KanjiForgeTheme.colors
+    val haptics = rememberKanjiHaptics()
+    val chipColors = FilterChipDefaults.filterChipColors(
+        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         title = { Text("Choose a study mode", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 StudyModeOption(
                     title = "Flashcard study",
                     description = "Review character, meaning, and reading prompts.",
@@ -390,6 +500,34 @@ fun StudyModePickerDialog(
                     accent = colors.modeQuizAccent,
                     selected = selectedMode == SessionMode.QUIZ,
                 ) { onSelectMode(SessionMode.QUIZ) }
+                AnimatedVisibility(visible = selectedMode == SessionMode.QUIZ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(start = 4.dp, top = 2.dp, bottom = 2.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            "Quiz focus",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            QuizPrompt.entries.forEach { prompt ->
+                                FilterChip(
+                                    selected = selectedQuizFocus == prompt,
+                                    onClick = {
+                                        haptics(KanjiHaptic.TICK)
+                                        onSelectQuizFocus(prompt)
+                                    },
+                                    colors = chipColors,
+                                    label = { Text(prompt.displayLabel()) },
+                                )
+                            }
+                        }
+                    }
+                }
                 StudyModeOption(
                     title = "Writing practice",
                     description = "Draw each kanji, then compare with the stroke guide.",

@@ -37,7 +37,7 @@ data class SessionRecord(
 data class StudyPreferences(
     val dailyNew: Int = 100,
     val cardDirection: CardDirection = CardDirection.MEANING,
-    val quizPrompt: QuizPrompt = QuizPrompt.MIXED,
+    val quizPrompt: QuizPrompt = QuizPrompt.MEANING,
     val repeatWrongAnswers: Boolean = false,
     val autoPlayAudio: Boolean = false,
     val amoledDark: Boolean = false,

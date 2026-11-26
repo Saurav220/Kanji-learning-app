@@ -277,7 +277,7 @@ private fun ActiveSessionContent(
     val themeColors = KanjiForgeTheme.colors
     val modeLabel = when (state.mode) {
         SessionMode.CARDS -> "Flashcards"
-        SessionMode.QUIZ -> "Multiple choice"
+        SessionMode.QUIZ -> state.quizFocus?.let { "Multiple choice · ${it.displayLabel()}" } ?: "Multiple choice"
         SessionMode.WRITING -> "Writing practice"
     }
 
