@@ -471,8 +471,8 @@ private fun PracticeSectionCard(onStart: (SessionMode) -> Unit) {
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 PracticeListRow(
-                    title = "Quick quiz",
-                    detail = "Choose the matching meaning or reading",
+                    title = "Multiple choice",
+                    detail = "Test meanings, readings, words, or sentences",
                     icon = Icons.Outlined.Quiz,
                     accent = themeColors.modeQuizAccent,
                 ) { onStart(SessionMode.QUIZ) }

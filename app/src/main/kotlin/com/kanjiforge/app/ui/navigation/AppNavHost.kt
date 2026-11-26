@@ -79,7 +79,10 @@ import com.kanjiforge.app.AppContainer
 import com.kanjiforge.app.data.reference.CatalogBootstrapState
 import com.kanjiforge.app.data.reference.ReferenceCatalog
 import com.kanjiforge.app.data.reference.model.StudySequenceFamily
+import com.kanjiforge.app.domain.QuizPrompt
+import com.kanjiforge.app.domain.SessionMode
 import com.kanjiforge.app.domain.SessionSpec
+import com.kanjiforge.app.domain.StudyPreferences
 import com.kanjiforge.app.ui.components.KanjiHaptic
 import com.kanjiforge.app.ui.components.LocalSnackbarHostState
 import com.kanjiforge.app.ui.components.LocalSpeechSpeaker
@@ -104,6 +107,7 @@ import com.kanjiforge.app.ui.sets.CollectionsViewModel
 import com.kanjiforge.app.ui.settings.SettingsScreen
 import com.kanjiforge.app.ui.settings.SettingsViewModel
 import com.kanjiforge.app.ui.setup.CatalogSetupScreen
+import com.kanjiforge.app.ui.study.QuizFocusPickerDialog
 import com.kanjiforge.app.ui.study.StudyLevelsScreen
 import com.kanjiforge.app.ui.study.StudyLevelsViewModel
 import com.kanjiforge.app.ui.study.StudySequencesScreen
@@ -169,6 +173,21 @@ private fun AppShell(
     val reduceMotion = rememberReduceMotion()
     val scope = rememberCoroutineScope()
     var sessionExitHandler by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val preferences by container.studyStore.preferences.collectAsStateWithLifecycle(initialValue = StudyPreferences())
+    var pendingQuizSpec by remember { mutableStateOf<SessionSpec?>(null) }
+
+    fun launchSession(mode: SessionMode, spec: SessionSpec, quizFocus: QuizPrompt? = null) {
+        if (mode == SessionMode.QUIZ && quizFocus != null) {
+            scope.launch {
+                container.studyStore.updatePreferences { it.copy(quizPrompt = quizFocus) }
+            }
+            navController.navigate(StudySessionRoute.from(mode, spec, quizFocus))
+        } else if (mode == SessionMode.QUIZ) {
+            pendingQuizSpec = spec
+        } else {
+            navController.navigate(StudySessionRoute.from(mode, spec))
+        }
+    }
 
     fun navigateToTopLevel(route: Any) {
         navController.navigate(route) {
@@ -442,7 +461,7 @@ private fun AppShell(
                         TodayScreen(
                             viewModel = vm,
                             onStart = { mode ->
-                                navController.navigate(StudySessionRoute.from(mode, SessionSpec.DailyReview))
+                                launchSession(mode, SessionSpec.DailyReview)
                             },
                             onStudy = {
                                 navigateToTopLevel(StudySequencesRoute)
@@ -504,7 +523,7 @@ private fun AppShell(
                                 navController.navigate(StudyLevelsRoute.from(family))
                             },
                             onStartDaily = { mode ->
-                                navController.navigate(StudySessionRoute.from(mode, SessionSpec.DailyReview))
+                                launchSession(mode, SessionSpec.DailyReview)
                             },
                         )
                     }
@@ -524,12 +543,14 @@ private fun AppShell(
                         val vm = rememberVm("study-sets-${route.family.name}-${route.level}") {
                             StudySetsViewModel(route.family, route.level, studyCatalog)
                         }
-                        StudySetsScreen(vm) { mode, offset, batchSize ->
-                            navController.navigate(
-                                StudySessionRoute.from(
-                                    mode,
-                                    SessionSpec.SequenceSet(route.family, route.level, offset, batchSize),
-                                ),
+                        StudySetsScreen(
+                            viewModel = vm,
+                            defaultQuizFocus = preferences.quizPrompt,
+                        ) { mode, quizFocus, offset, batchSize ->
+                            launchSession(
+                                mode,
+                                SessionSpec.SequenceSet(route.family, route.level, offset, batchSize),
+                                quizFocus,
                             )
                         }
                     }
@@ -537,7 +558,7 @@ private fun AppShell(
                     composable<StudySessionRoute> { entry ->
                         val route = entry.toRoute<StudySessionRoute>()
                         val spec = route.toSpec()
-                        val vm = rememberVm("study-session-${route.modeName}-${route.specKind}-${route.code}-${route.setId}-${route.familyName}-${route.level}-${route.offset}-${route.batchSize}") {
+                        val vm = rememberVm("study-session-${route.modeName}-${route.quizPromptName}-${route.specKind}-${route.code}-${route.setId}-${route.familyName}-${route.level}-${route.offset}-${route.batchSize}") {
                             StudySessionViewModel(
                                 mode = route.mode,
                                 spec = spec,
@@ -545,6 +566,7 @@ private fun AppShell(
                                 store = container.studyStore,
                                 clock = container.clock,
                                 applicationScope = container.applicationScope,
+                                quizFocus = route.quizPrompt,
                             )
                         }
                         StudySessionScreen(
@@ -568,8 +590,9 @@ private fun AppShell(
                         }
                         CollectionDetailScreen(
                             viewModel = vm,
-                            onStartStudy = { mode, setId ->
-                                navController.navigate(StudySessionRoute.from(mode, SessionSpec.Collection(setId)))
+                            defaultQuizFocus = preferences.quizPrompt,
+                            onStartStudy = { mode, quizFocus, setId ->
+                                launchSession(mode, SessionSpec.Collection(setId), quizFocus)
                             },
                             onOpenKanji = { code -> navController.navigate(KanjiDetailRoute(code)) },
                             onOpenWord = { wordId -> navController.navigate(WordDetailRoute(wordId)) },
@@ -601,6 +624,16 @@ private fun AppShell(
                                 val vm = rememberVm("settings") { SettingsViewModel(container.studyStore, container.backupManager) }
                                 SettingsScreen(vm)
                             }
+                        }
+                        pendingQuizSpec?.let { spec ->
+                            QuizFocusPickerDialog(
+                                currentFocus = preferences.quizPrompt,
+                                onSelectFocus = { focus ->
+                                    pendingQuizSpec = null
+                                    launchSession(SessionMode.QUIZ, spec, focus)
+                                },
+                                onDismiss = { pendingQuizSpec = null },
+                            )
                         }
                     }
                 }

@@ -73,7 +73,7 @@ class BackupManager(
     private data class PreferencesDto(
         val dailyNew: Double = 100.0,
         val cardDirection: String = "meaning",
-        val quizPrompt: String = "mixed",
+        val quizPrompt: String = "meaning",
         val repeatWrongAnswers: Boolean = false,
         val autoPlayAudio: Boolean = false,
         val amoledDark: Boolean = false,

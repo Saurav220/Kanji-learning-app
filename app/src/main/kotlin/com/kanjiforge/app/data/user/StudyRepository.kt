@@ -263,8 +263,8 @@ class StudyRepository(
             CardDirection.valueOf(values[cardDirectionKey] ?: "MEANING")
         }.getOrDefault(CardDirection.MEANING),
         quizPrompt = runCatching {
-            QuizPrompt.valueOf(values[quizPromptKey] ?: "MIXED")
-        }.getOrDefault(QuizPrompt.MIXED),
+            QuizPrompt.valueOf(values[quizPromptKey] ?: QuizPrompt.MEANING.name)
+        }.getOrDefault(QuizPrompt.MEANING),
         repeatWrongAnswers = values[repeatWrongKey] ?: false,
         autoPlayAudio = values[autoPlayAudioKey] ?: false,
         amoledDark = values[amoledDarkKey] ?: false,

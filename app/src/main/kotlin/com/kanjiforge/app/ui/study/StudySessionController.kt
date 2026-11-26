@@ -59,6 +59,7 @@ sealed interface StudySessionUiState {
         val mode: SessionMode,
         val headerSubtitle: String?,
         val autoPlayAudio: Boolean,
+        val quizFocus: QuizPrompt? = null,
         val isSubmitting: Boolean = false,
     ) : StudySessionUiState
 
@@ -89,6 +90,7 @@ class StudySessionController(
     private val randomSeed: Long = clock.millis(),
     private val scope: CoroutineScope,
     private val saveScope: CoroutineScope = scope,
+    private val quizFocus: QuizPrompt? = null,
 ) {
     private val _state = MutableStateFlow<StudySessionUiState>(StudySessionUiState.Loading)
     val state: StateFlow<StudySessionUiState> = _state.asStateFlow()
@@ -147,6 +149,7 @@ class StudySessionController(
                 }
 
                 val firstCard = prepareCard(index = 0, summary = queue[0], prefs = prefs)
+                val effectiveQuizFocus = if (mode == SessionMode.QUIZ) quizFocus ?: prefs.quizPrompt else null
                 _state.value = StudySessionUiState.Active(
                     card = firstCard,
                     index = 0,
@@ -154,6 +157,7 @@ class StudySessionController(
                     mode = mode,
                     headerSubtitle = headerSubtitleFor(spec, queue.size),
                     autoPlayAudio = prefs.autoPlayAudio,
+                    quizFocus = effectiveQuizFocus,
                     isSubmitting = false,
                 )
             } catch (error: Exception) {
@@ -297,6 +301,7 @@ class StudySessionController(
         } else {
             currentIndex = nextIndex
             val nextCard = prepareCard(index = nextIndex, summary = queue[nextIndex], prefs = prefs)
+            val effectiveQuizFocus = if (mode == SessionMode.QUIZ) quizFocus ?: prefs.quizPrompt else null
             _state.value = StudySessionUiState.Active(
                 card = nextCard,
                 index = nextIndex,
@@ -304,6 +309,7 @@ class StudySessionController(
                 mode = mode,
                 headerSubtitle = headerSubtitleFor(spec, queue.size),
                 autoPlayAudio = prefs.autoPlayAudio,
+                quizFocus = effectiveQuizFocus,
                 isSubmitting = false,
             )
         }
@@ -367,7 +373,7 @@ class StudySessionController(
         val spokenReading = (detail.on + detail.kun).firstOrNull().orEmpty()
 
         val quiz = if (mode == SessionMode.QUIZ) {
-            buildQuizQuestion(index = index, target = summary, detail = detail, preferred = prefs.quizPrompt)
+            buildQuizQuestion(index = index, target = summary, detail = detail, preferred = quizFocus ?: prefs.quizPrompt)
         } else {
             null
         }
@@ -407,12 +413,13 @@ class StudySessionController(
         )
 
         val targetInfo = candidateInfos[target.code]
+        val hasReading = !targetInfo?.readings.isNullOrEmpty() || detail.on.isNotEmpty() || detail.kun.isNotEmpty()
         val hasWord = !targetInfo?.sampleWord.isNullOrBlank() ||
             detail.words.any { word -> word.forms.any { it.contains(target.character) } }
         val hasSentence = !targetInfo?.sampleSentence.isNullOrBlank() ||
             detail.sentences.any { it.plainText.isNotBlank() }
 
-        val prompt = resolveQuizPrompt(preferred, index, hasWord, hasSentence)
+        val prompt = resolveQuizPrompt(preferred, index, hasReading, hasWord, hasSentence)
 
         fun answerText(item: KanjiSummary): String {
             val info: QuizCandidateInfo? = candidateInfos[item.code]
@@ -486,20 +493,30 @@ class StudySessionController(
     private fun resolveQuizPrompt(
         preferred: QuizPrompt,
         position: Int,
+        hasReading: Boolean,
         hasWord: Boolean,
         hasSentence: Boolean,
     ): QuizPrompt {
         val available = buildList {
             add(QuizPrompt.MEANING)
-            add(QuizPrompt.READING)
+            if (hasReading) add(QuizPrompt.READING)
             if (hasWord) add(QuizPrompt.WORD)
             if (hasSentence) add(QuizPrompt.SENTENCE)
         }
         return when (preferred) {
             QuizPrompt.MIXED -> available[position.mod(available.size)]
-            QuizPrompt.WORD -> if (hasWord) QuizPrompt.WORD else QuizPrompt.READING
-            QuizPrompt.SENTENCE -> if (hasSentence) QuizPrompt.SENTENCE else QuizPrompt.READING
-            else -> preferred
+            QuizPrompt.READING -> if (hasReading) QuizPrompt.READING else QuizPrompt.MEANING
+            QuizPrompt.WORD -> when {
+                hasWord -> QuizPrompt.WORD
+                hasReading -> QuizPrompt.READING
+                else -> QuizPrompt.MEANING
+            }
+            QuizPrompt.SENTENCE -> when {
+                hasSentence -> QuizPrompt.SENTENCE
+                hasReading -> QuizPrompt.READING
+                else -> QuizPrompt.MEANING
+            }
+            QuizPrompt.MEANING -> QuizPrompt.MEANING
         }
     }
 
@@ -608,6 +625,7 @@ class StudySessionViewModel(
     store: StudyStore,
     clock: Clock,
     applicationScope: CoroutineScope,
+    quizFocus: QuizPrompt? = null,
 ) : ViewModel() {
     private val controller = StudySessionController(
         mode = mode,
@@ -617,6 +635,7 @@ class StudySessionViewModel(
         clock = clock,
         scope = viewModelScope,
         saveScope = applicationScope,
+        quizFocus = quizFocus,
     )
 
     val state: StateFlow<StudySessionUiState> = controller.state

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.kanjiforge.app.data.reference.model.StudySequenceFamily
+import com.kanjiforge.app.domain.QuizPrompt
 import com.kanjiforge.app.domain.SessionMode
 import com.kanjiforge.app.domain.SessionSpec
 import kotlinx.serialization.Serializable
@@ -55,9 +56,13 @@ data class StudySessionRoute(
     val level: Int? = null,
     val offset: Int? = null,
     val batchSize: Int? = null,
+    val quizPromptName: String? = null,
 ) {
     val mode: SessionMode
         get() = runCatching { SessionMode.valueOf(modeName) }.getOrDefault(SessionMode.CARDS)
+
+    val quizPrompt: QuizPrompt?
+        get() = quizPromptName?.let { runCatching { QuizPrompt.valueOf(it) }.getOrNull() }
 
     fun toSpec(): SessionSpec = when (specKind) {
         SPEC_SINGLE -> SessionSpec.SingleKanji(code ?: 0)
@@ -77,18 +82,40 @@ data class StudySessionRoute(
         private const val SPEC_COLLECTION = "collection"
         private const val SPEC_SEQUENCE = "sequence"
 
-        fun from(mode: SessionMode, spec: SessionSpec): StudySessionRoute = when (spec) {
-            SessionSpec.DailyReview -> StudySessionRoute(modeName = mode.name, specKind = SPEC_DAILY)
-            is SessionSpec.SingleKanji -> StudySessionRoute(modeName = mode.name, specKind = SPEC_SINGLE, code = spec.code)
-            is SessionSpec.Collection -> StudySessionRoute(modeName = mode.name, specKind = SPEC_COLLECTION, setId = spec.setId)
-            is SessionSpec.SequenceSet -> StudySessionRoute(
-                modeName = mode.name,
-                specKind = SPEC_SEQUENCE,
-                familyName = spec.family.name,
-                level = spec.level,
-                offset = spec.offset,
-                batchSize = spec.batchSize,
-            )
+        fun from(
+            mode: SessionMode,
+            spec: SessionSpec,
+            quizPrompt: QuizPrompt? = null,
+        ): StudySessionRoute {
+            val promptName = if (mode == SessionMode.QUIZ) quizPrompt?.name else null
+            return when (spec) {
+                SessionSpec.DailyReview -> StudySessionRoute(
+                    modeName = mode.name,
+                    specKind = SPEC_DAILY,
+                    quizPromptName = promptName,
+                )
+                is SessionSpec.SingleKanji -> StudySessionRoute(
+                    modeName = mode.name,
+                    specKind = SPEC_SINGLE,
+                    code = spec.code,
+                    quizPromptName = promptName,
+                )
+                is SessionSpec.Collection -> StudySessionRoute(
+                    modeName = mode.name,
+                    specKind = SPEC_COLLECTION,
+                    setId = spec.setId,
+                    quizPromptName = promptName,
+                )
+                is SessionSpec.SequenceSet -> StudySessionRoute(
+                    modeName = mode.name,
+                    specKind = SPEC_SEQUENCE,
+                    familyName = spec.family.name,
+                    level = spec.level,
+                    offset = spec.offset,
+                    batchSize = spec.batchSize,
+                    quizPromptName = promptName,
+                )
+            }
         }
     }
 }

@@ -109,7 +109,7 @@ class BackupManagerTest {
         assertEquals("Newer local review must not be overwritten by older backup", Rating.EASY, reviews["日"]?.lastRating)
         assertEquals("Missing firstReviewedAt should fall back to lastReviewedAt", 6_000L, reviews["木"]?.firstReviewedAt)
         assertEquals(10, store._preferences.first().dailyNew)
-        assertEquals(QuizPrompt.MIXED, store._preferences.first().quizPrompt)
+        assertEquals(QuizPrompt.MEANING, store._preferences.first().quizPrompt)
         assertFalse(store._preferences.first().repeatWrongAnswers)
         assertFalse(store._preferences.first().amoledDark)
     }

@@ -54,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.kanjiforge.app.domain.CollectionDetailState
 import com.kanjiforge.app.domain.CollectionsState
+import com.kanjiforge.app.domain.QuizPrompt
 import com.kanjiforge.app.domain.ResolvedSetMember
 import com.kanjiforge.app.domain.ReviewType
 import com.kanjiforge.app.domain.SessionMode
@@ -259,7 +260,8 @@ fun CollectionsScreen(
 @Composable
 fun CollectionDetailScreen(
     viewModel: CollectionDetailViewModel,
-    onStartStudy: (SessionMode, String) -> Unit,
+    defaultQuizFocus: QuizPrompt,
+    onStartStudy: (SessionMode, QuizPrompt?, String) -> Unit,
     onOpenKanji: (Int) -> Unit,
     onOpenWord: (Long) -> Unit,
     onDeleted: () -> Unit,
@@ -271,6 +273,7 @@ fun CollectionDetailScreen(
     var confirmDelete by remember { mutableStateOf(false) }
     var showModePicker by remember { mutableStateOf(false) }
     var selectedMode by remember { mutableStateOf(SessionMode.CARDS) }
+    var selectedQuizFocus by remember { mutableStateOf(defaultQuizFocus) }
 
     when (val current = state) {
         CollectionDetailState.Loading -> {
@@ -310,6 +313,8 @@ fun CollectionDetailScreen(
                                     enabled = current.members.any { it.type == ReviewType.KANJI },
                                     onClick = {
                                         haptics(KanjiHaptic.TAP)
+                                        selectedMode = SessionMode.CARDS
+                                        selectedQuizFocus = defaultQuizFocus
                                         showModePicker = true
                                     },
                                     shape = RoundedCornerShape(14.dp),
@@ -397,9 +402,12 @@ fun CollectionDetailScreen(
                 StudyModePickerDialog(
                     selectedMode = selectedMode,
                     onSelectMode = { selectedMode = it },
+                    selectedQuizFocus = selectedQuizFocus,
+                    onSelectQuizFocus = { selectedQuizFocus = it },
                     onStart = {
                         showModePicker = false
-                        onStartStudy(selectedMode, current.set.id)
+                        val focus = if (selectedMode == SessionMode.QUIZ) selectedQuizFocus else null
+                        onStartStudy(selectedMode, focus, current.set.id)
                     },
                     onDismiss = { showModePicker = false },
                 )

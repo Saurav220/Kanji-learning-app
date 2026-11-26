@@ -205,7 +205,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                     }
                 }
 
-                Text("Multiple-choice questions", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text("Default quiz focus", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 Box {
                     OutlinedButton(
                         onClick = {
