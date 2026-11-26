@@ -1,0 +1,9 @@
+{
+  "name": "KanjiForge Japanese Study",
+  "short_name": "KanjiForge",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f2ed",
+  "theme_color": "#f3f2ed",
+  "icons": [{ "src": "/kanjiforge.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

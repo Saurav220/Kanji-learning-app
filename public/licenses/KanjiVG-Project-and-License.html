@@ -1,0 +1,207 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:72rem;margin:2rem auto;padding:0 1rem;font:16px/1.55 system-ui,sans-serif;color:#222}table{border-collapse:collapse}td,th{padding:.4rem;border:1px solid #ccc}pre{white-space:pre-wrap}</style>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>KanjiVG</title>
+    <meta name="author" content="Ulrich Apel">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="index.html">KanjiVG</a>
+            <form class="navbar-search pull-right" method="get" action="viewer.html">
+              
+            </form>
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Project</li>
+              <li class="">
+                <a href="index.html"><i class="icon-home "></i>Home</a>
+              </li>
+              <li class="">
+                <a href="viewer.html"><i class="icon-picture "></i>Viewer</a>
+              </li>
+              <li class="">
+                <a href="listing.html"><i class="icon-list "></i>Listing</a>
+              </li>
+              <li class="">
+                <a href="faq.html"><i class="icon-question-sign "></i>FAQ</a>
+              </li>
+              <li class="nav-header">Source code</li>
+              <li>
+                <a href="https://github.com/KanjiVG/kanjivg/releases"><i class="icon-download"></i>Download (at Github)</a>
+              </li>
+              <li>
+                <a href="https://github.com/KanjiVG/kanjivg"><i class="icon-list"></i>Repository (at Github)</a>
+              </li>
+              <li>
+                <a href="https://github.com/KanjiVG/kanjivg/issues"><i class="icon-exclamation-sign"></i>Issues (at Github)</a>
+              </li>
+              <li class="nav-header">Format</li>
+              <li class="">
+                <a href="files.html"><i class="icon-info-sign "></i>Files</a>
+              </li>
+              <li class="">
+                <a href="svg-format.html"><i class="icon-info-sign "></i>SVG Format</a>
+              </li>
+              <li class="">
+                <a href="stroke-types.html"><i class="icon-info-sign "></i>Stroke types</a>
+              </li>
+              <li class="">
+                <a href="variants.html"><i class="icon-info-sign "></i>Variants</a>
+              </li>
+              <li class="">
+                <a href="radicals.html"><i class="icon-info-sign "></i>Radicals</a>
+              </li>
+              <li class="">
+                <a href="glossary.html"><i class="icon-info-sign "></i>Glossary</a>
+              </li>
+              <li class="">
+                <a href="ref.html"><i class="icon-info-sign "></i>References</a>
+              </li>
+              <li class="">
+                <a href="known-problems"><i class="icon-info-sign "></i>Known problems</a>
+              </li>
+              <li class="nav-header">Community</li>
+              <li class="">
+                <a href="https://groups.google.com/group/kanjivg"><i class="icon-list-alt "></i>Mailing list</a>
+              </li>
+              <li class="">
+                <a href="projects.html"><i class="icon-asterisk "></i>Projects using KanjiVG</a>
+              </li>
+              <li class="">
+                <a href="related.html"><i class="icon-heart "></i>Related projects</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span10">
+          <p>KanjiVG: Kanji Vector Graphics</p>
+
+<h2 id="licence">Licence</h2>
+<p>KanjiVG is copyright Ulrich Apel and released under the Creative Commons
+Attribution-Share Alike 3.0 licence:</p>
+
+<p>http://creativecommons.org/licenses/by-sa/3.0/</p>
+
+<p>See the file COPYING for more details.</p>
+
+<h2 id="documentation">Documentation</h2>
+<p>The project’s documentation is at https://kanjivg.tagaini.net/.</p>
+
+<h2 id="releases">Releases</h2>
+
+<p>The files in the release are as follows:</p>
+
+<ul>
+  <li>kanjivg-YYYYMMDD-main.zip</li>
+</ul>
+
+<p>This zip file contains all of the non-variant SVG files in the same
+format as they were in the repository at the time the release was
+made. This is the file which is recommended for most users who simply
+want a set of SVG graphics they can use immediately.</p>
+
+<ul>
+  <li>kanjivg-YYYYMMDD-all.zip</li>
+</ul>
+
+<p>This zip file contains all of the SVG files, including the variant
+forms, in the same format as they were in the repository at the time
+the release was made.</p>
+
+<ul>
+  <li>kanjivg-YYYYMMDD-stripped.zip</li>
+</ul>
+
+<p>This zip file contains all of the SVG files, including the variant
+forms, but with all of the attributes such as the stroke type,
+radical, or element removed from the files. This file is specifically
+for people who use XML parsers which limit the use of user-defined
+attributes.</p>
+
+<ul>
+  <li>kanjivg-YYYYMMDD.xml.gz</li>
+</ul>
+
+<p>The file kanjivg-YYYYMMDD.xml.gz contains all of the non-variant SVG
+files in one large XML structure. This is the format in which KanjiVG
+was first released. However, although this format will not be removed,
+it should now be considered obsolete, and is only provided for users
+who want to keep using “legacy” software written for the old
+format. This file is generated by <code class="language-plaintext highlighter-rouge">kvg.py</code>.</p>
+
+<ul>
+  <li>Source code files</li>
+</ul>
+
+<p>These are the entire repository’s source code files. These are
+generated by github.</p>
+
+<h2 id="other-files-in-the-repository">Other files in the repository</h2>
+
+<ul>
+  <li>
+    <p>A utility for unpacking the information in KanjiVG is provided in
+<code class="language-plaintext highlighter-rouge">kvg-lookup.py</code>.  Please see its source code for documentation.</p>
+  </li>
+  <li>
+    <p>Releases are generated using the <code class="language-plaintext highlighter-rouge">updatepublic.sh</code> shell
+script.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">kvg.py</code> generates the legacy format data.</p>
+  </li>
+  <li>
+    <p>There is some Python library code in <code class="language-plaintext highlighter-rouge">kanjivg.py</code>, <code class="language-plaintext highlighter-rouge">utils.py</code>, and
+<code class="language-plaintext highlighter-rouge">xmlhandler.py</code> for manipulating the files.</p>
+  </li>
+  <li>
+    <p>The file <code class="language-plaintext highlighter-rouge">make-index.py</code> is for making an index of the kanji files
+called <code class="language-plaintext highlighter-rouge">kvg-index.json</code>. This index file is used by <a href="https://kanjivg.tagaini.net/viewer.html">the online
+KanjiVG viewer at the kanjivg
+website</a>. Unfortunately the
+index file needs to be part of this repository in order that the
+Javascript viewer can work properly.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">clean.py</code> removes unnecessary files which have accumulated.</p>
+  </li>
+</ul>
+
+        </div>
+      </div>
+      <hr>
+      <footer>
+        
+        <p>
+          &copy; 2009 &mdash; 2026 Ulrich Apel &mdash; <a href="index.html">Licensing</a>
+        </p>
+        <p>
+          The source code for this documentation is at
+          <a href="https://github.com/KanjiVG/kanjivg.github.com">github.com</a>.  Report issues with
+          the documentation on the
+          <a href="https://github.com/KanjiVG/kanjivg.github.com/issues">issues page</a>.  To ask
+          questions or discuss KanjiVG, use the <a href="https://groups.google.com/group/kanjivg">mailing list</a>.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

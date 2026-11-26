@@ -1,0 +1,58 @@
+# Build & IDE artifacts
+.gradle/
+.kotlin/
+build/
+**/build/
+dist/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Dependencies & caches
+node_modules/
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+
+# Compiled packages & signing keys (APKs are distributed via GitHub Releases)
+*.apk
+*.aab
+*.ap_
+*.dex
+*.keystore
+*.jks
+
+# Local research, tooling, AI workflow state, and internal docs
+.superpowers/
+analysis/
+artifacts/
+pics/
+tools/
+PRODUCT.md
+docs/superpowers/
+docs/architecture.md
+docs/gap_analysis_7.8.3.md
+docs/kanji-study-7.8.3-findings.md
+docs/kanjistudy-parity-audit.md
+docs/production_data_spec.md
+docs/product_requirements.md
+docs/recreation_design.md
+docs/reference_analysis.md
+docs/reference_payload_analysis_7.8.3.md
+docs/runtime_database_schema_7.8.3.sql
+docs/runtime_snapshot_7.8.3.md
+scripts/export_runtime_data.py
+scripts/test_reference_sequences.py
+tests/search.test.mjs
+
+# Large generated / upstream binary datasets (reproducible locally)
+app/src/main/assets/reference/
+public/data/reference/
+src/data/generated/
+data/sources/*.gz
+data/sources/*.zip

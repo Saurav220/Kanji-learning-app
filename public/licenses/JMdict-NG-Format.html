@@ -1,0 +1,296 @@
+<!doctype html><meta charset="utf-8"><style>body{max-width:72rem;margin:2rem auto;padding:0 1rem;font:16px/1.55 system-ui,sans-serif;color:#222}table{border-collapse:collapse}td,th{padding:.4rem;border:1px solid #ccc}pre{white-space:pre-wrap}</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.16">
+<title>JMdict: Next Generation</title>
+
+
+
+</head>
+<body class="article">
+<div id="header">
+<h1>JMdict: Next Generation</h1>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_preface">Preface</a></li>
+<li><a href="#_the_next_generation_of_jmdict">1. The Next Generation of JMdict</a>
+<ul class="sectlevel2">
+<li><a href="#_introduction">1.1. Introduction</a></li>
+<li><a href="#_element_changes">1.2. Element Changes</a>
+<ul class="sectlevel3">
+<li><a href="#_creation_date_and_version">1.2.1. Creation Date and Version</a></li>
+<li><a href="#_entry_wide_information_elements">1.2.2. Entry-wide Information Elements</a></li>
+<li><a href="#_entry_wide_language_source_elements">1.2.3. Entry-wide Language Source Elements</a></li>
+<li><a href="#_entry_wide_inflection_pattern_elements">1.2.4. Entry-wide Inflection Pattern Elements</a></li>
+<li><a href="#_pitch_accent_elements">1.2.5. Pitch Accent Elements</a></li>
+<li><a href="#_cross_references">1.2.6. Cross-References</a></li>
+</ul>
+</li>
+<li><a href="#_part_of_speech_separation">1.3. Part-of-Speech Separation</a></li>
+<li><a href="#_additional_attribute_values">1.4. Additional Attribute Values</a></li>
+<li><a href="#_additional_entity_values">1.5. Additional Entity Values</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_preface">Preface</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is a reproduction of the original document by Jim Breen
+that was formerly available at:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://www.edrdg.org/wiki/index.php/JMdict:_Next_Generation" class="bare">https://www.edrdg.org/wiki/index.php/JMdict:_Next_Generation</a></p>
+</div>
+<div class="paragraph">
+<p>The Edrdg Wiki is no longer available but an archived copy is
+available at:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://web.archive.org/web/20250124121705/http://www.edrdg.org/wiki/index.php/JMdict:_Next_Generation" class="bare">https://web.archive.org/web/20250124121705/http://www.edrdg.org/wiki/index.php/JMdict:_Next_Generation</a></p>
+</div>
+<div class="paragraph">
+<p>A plain HTML version is also available at:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://www.edrdg.org/wiki/JMdict_Next_Generation.html" class="bare">https://www.edrdg.org/wiki/JMdict_Next_Generation.html</a></p>
+</div>
+<div class="paragraph">
+<p>The content of this document is intended to be identical to
+web.archive.org version with only the styling adjusted for
+consistency with the other JMdictDB documentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_next_generation_of_jmdict">1. The Next Generation of JMdict</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_introduction">1.1. Introduction</h3>
+<div class="paragraph">
+<p>This page has been set up to record proposed changes to the JMdict microstructure, i.e. the way the information in the dictionary is recorded and laid out. The file as distributed is in XML format and the structure is defined in the JMdict DTD (document type definition). The current DTD can be viewed
+<a href="https://www.edrdg.org/jmdict/jmdict_dtd_h.html">here</a>,
+and a sample of an entry
+<a href="https://www.edrdg.org/jmdict/jmdict_sample.html">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>The changes are likely to involve:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>additional or changed XML elements. These are the data items of groups of items that carry the information. For example the kanji forms of a Japanese term are located in "keb" elements within a "k_ele" element.</p>
+</li>
+<li>
+<p>additional or changed attributes. These attributes and their values provide information about the element, for example the "gloss" element uses the "xml:lang" attribute to carry the language code.</p>
+</li>
+<li>
+<p>additional or changed entity values. These are standardized codes covering such things as part-of-speech, dialects, etc.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that the changes to the XML elements involve modifying the database structure and support software. The attribute and entity value changes are more straightforward and do not require database or software changes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_element_changes">1.2. Element Changes</h3>
+<div class="sect3">
+<h4 id="_creation_date_and_version">1.2.1. Creation Date and Version</h4>
+<div class="paragraph">
+<p>It is proposed to include the creation date and DTD version as attributes in the JMdict element. For example: &lt;JMdict created="2022-01-24" version="1.10"&gt;</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_entry_wide_information_elements">1.2.2. Entry-wide Information Elements</h4>
+<div class="paragraph">
+<p>It is proposed to introduce between the reading (&lt;r_ele&gt;) and sense (&lt;sense&gt;) elements an information element for carrying relevant information about the lexical item as a whole. At present such information can only be recorded about senses. Thus the top level of the DTD would change from:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;!ELEMENT entry (ent_seq, k_ele*, r_ele+, sense+)&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;!ELEMENT entry (ent_seq, k_ele*, r_ele+, info*, sense+)&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There could be zero, one or more &lt;info&gt; elements. The contents would be unstructured text, and an attribute (inf_type) would be used to indicate the type of information, e.g. literal translation, derivation, etc. The DTD description would be:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;!ELEMENT info (#PCDATA)&gt;
+&lt;!ATTLIST info inf_type CDATA #IMPLIED&gt;</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_entry_wide_language_source_elements">1.2.3. Entry-wide Language Source Elements</h4>
+<div class="paragraph">
+<p>It is proposed to combine the current &lt;lsource&gt; element move from within the &lt;sense&gt; element to become entry wide. The &lt;lsource&gt; element would retain its current attributes (xml:lang, ls_type, ls_wasei). As an example of this, the current アンジョ entry would simply see &lt;lsource xml:lang="por"&gt;anjo&lt;/lsource&gt; move from the first (and only) sense to be entry wide.</p>
+</div>
+<div class="paragraph">
+<p>Implicit in this change is that entries, such as パン, which record loanwords from several source languages, will need to be split into an entry for each source language term.</p>
+</div>
+<div class="paragraph">
+<p>(An earlier suggestion that the &lt;dial&gt; elements would also become entry wide as an attribute of &lt;lsource&gt; has been withdrawn.)</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_entry_wide_inflection_pattern_elements">1.2.4. Entry-wide Inflection Pattern Elements</h4>
+<div class="paragraph">
+<p>It is proposed to include an entry-wide &lt;infl&gt; element containing information about conjugation or inflection patterns of the entry. This element would typically only be used for entries which comprise or end with a verb or adjective, and would indicate the appropriate inflections for tense, mood, aspect, etc. It would supplement and partially replace the present system where such information is embedded in the part-of-speech coding as the sense level (v1, v5m, adj-i, etc.) The format of the element has yet to be decided.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_pitch_accent_elements">1.2.5. Pitch Accent Elements</h4>
+<div class="paragraph">
+<p>It is proposed to provide for pitch accent information to be included with each reading of a Japanese term. This will be an additional element associated with each reading, and the proposed change to the DTD would from:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;!ELEMENT r_ele (reb, re_nokanji?, re_restr*, re_inf*, re_pri*)&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;!ELEMENT r_ele (reb, re_pa*, re_nokanji?, re_restr*, re_inf*, re_pri*)&gt;
+&lt;!ELEMENT re_pa (#PCDATA)&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There could be zero, one or several &lt;re_pa&gt; elements per reading. The actual format of the content of the &lt;re_pa&gt; has yet to be decided, however there should be the potential to support multiple systems for describing pitch accent information. A possible approach would be to have an attribute value such as:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;!ATTLIST re_pa pa_type CDATA #IMPLIED&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An example for entry 1584660 (明日/あした) might be "&lt;re_pa pa_type="am"&gt;3&lt;/re_pa&gt;" with the あした reading indicating an accent on the 3rd mora.</p>
+</div>
+<div class="paragraph">
+<p>The Wikipedia page on
+<a href="https://en.wikipedia.org/wiki/Japanese_pitch_accent">Japanese pitch accent</a>
+contains some useful information.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cross_references">1.2.6. Cross-References</h4>
+<div class="paragraph">
+<p>At present the &lt;xref&gt; element within &lt;sense&gt; simply states a target surface form and if specified a sense number, e.g. "&lt;xref&gt;スライド・1&lt;/xref&gt;". It is proposed to expand this by including the target entry sequence number and sense number as attributes, and also to allow for clearer identification of the preferred surface forms used in apps, etc. Examples:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;xref type="see" seq="1073760" sno="1"&gt;スライド[1]&lt;/xref&gt;
+&lt;xref type="see" seq="1375820" xr="なるほど"&gt;なるほど&lt;/xref&gt;
+&lt;xref type="see" seq="1585480" sno="2" xk="傀儡" xr="くぐつ"&gt;傀儡(くぐつ)[2]&lt;/xref&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The attributes would be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>type. Either "see" or "ant".</p>
+</li>
+<li>
+<p>seq. The sequence number of the target entry.</p>
+</li>
+<li>
+<p>sno. The sense within the target entry to which the cross-reference refers. If absent it will refer to the whole entry.</p>
+</li>
+<li>
+<p>xk. The kanji surface form in the target entry to be associated with the cross-reference. The default will the first form in the kanji field of the target entry, however it can be set during the creation or editing of the entry.</p>
+</li>
+<li>
+<p>xr. The reading surface form in the target entry to be associated with the cross-reference. Would only be used if there was no kanji field or if a specific reading is the target.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The text portion would be retained in a modified form as this makes it easier to generate legacy versions such as EDICT. The "・" (nakaguro) character would no longer be used to separate the parts of the target surface form as this character is used within some entry terms.</p>
+</div>
+<div class="paragraph">
+<p>In addition an optional "dict" attribute would be available to indicate a cross-reference to a related dictionary, e.g.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;xref type="see" dict="jmnedict" seq="5524869"&gt;朝日新聞&lt;/xref&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The current &lt;ant&gt; entity would be removed and instead "&lt;xref type="ant" &#8230;&#8203;&#8230;&#8203;&gt;" would be used.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_part_of_speech_separation">1.3. Part-of-Speech Separation</h3>
+<div class="paragraph">
+<p>At present the &lt;pos&gt; element within the &lt;sense&gt; element records both actual parts of speech, e.g. "n", "v5s", "adj-i", etc., as well as supplementary information that is not actually a POS, e.g. "adj-no", and general information which is not usually regarded as a POS at all, e.g. "exp", "int", etc.</p>
+</div>
+<div class="paragraph">
+<p>It was proposed that an additional element &lt;pos_sup&gt; be introduced to record the information which is not an actual POS. After some discussion that proposal has been withdrawn. A better approach may be to simply document which elements are actually parts of speech and which are supplementary information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_additional_attribute_values">1.4. Additional Attribute Values</h3>
+<div class="paragraph">
+<p>The main use of XML attributes in JMdict is to identify different types of &lt;gloss&gt; elements using the "g_type" attribute. At present the values used are "lit", "fig" and "expl". It is proposed to add the "descr" value to indicate a gloss which is a description of the Japanese term rather than a translation or an explanation of the meaning.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_additional_entity_values">1.5. Additional Entity Values</h3>
+<div class="paragraph">
+<p>JMdict uses an extensive set of standard entity values for such things as part-of-speech tags, dialect names, fields, etc. It is proposed to add a number of additional values. Some which have been added recently are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Christn - term associated with Christianity, as with the current "Buddh" and "Shinto" values</p>
+</li>
+<li>
+<p>net-sl - Internet slang</p>
+</li>
+<li>
+<p>dated - dated term</p>
+</li>
+<li>
+<p>hist - historical term</p>
+</li>
+<li>
+<p>litf - literary or formal term</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that these entity values are not really part of the "new generation" as they were part of the original structure.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-08-16 19:43:27 -0600
+</div>
+</div>
+</body>
+</html>
